@@ -10,13 +10,13 @@ class CriptoRepository {
         criptos.add(cripto)
     }
 
-    fun excluir(cripto: Cripto) {
-        criptos.remove(cripto)
-    }
+//    fun excluir(cripto: Cripto) {
+//        criptos.remove(cripto)
+//    }
 
     fun buscarPeloId(id: Long) =
         criptos.firstOrNull { it.id == id }
 
-    fun buscarPeloNome(nome: String) =
-        criptos.firstOrNull { it.nome == nome }
+//    fun buscarPeloNome(nome: String) =
+//        criptos.firstOrNull { it.nome == nome }
 }
