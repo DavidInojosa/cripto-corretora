@@ -32,7 +32,7 @@ class UsuarioValidator(
         }
 
         if (usuario.senha.isBlank()) {
-            throw UsuarioInvalidoException("O senha deve ser preenchido")
+            throw UsuarioInvalidoException("A senha deve ser preenchido")
         }
     }
 
@@ -56,11 +56,12 @@ class UsuarioValidator(
         }
 
         if (!emailUtil.isEmailValido(usuario.email)) {
-            throw UsuarioInvalidoException("O a emal deve seguir o formato palavra@palavra.palavra")
+            throw UsuarioInvalidoException("O e-mail deve seguir o formato palavra@palavra.palavra")
         }
 
         if (!senhaUtil.isFormatoOK(usuario.senha)) {
-            throw UsuarioInvalidoException("O a senha deve conter numeros, letras maisculas e minusculas")
+            throw UsuarioInvalidoException("A senha deve conter numeros, letras maisculas e minusculas")
         }
     }
+
 }

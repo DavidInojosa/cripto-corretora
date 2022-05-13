@@ -1,6 +1,9 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
 plugins {
     kotlin("jvm") version "1.5.10"
-    id("jacoco")
+    jacoco
 }
 
 group = "org.example"
@@ -12,29 +15,80 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("org.jetbrains.kotlin:kotlin-stdlib")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.5.10")
-
-    //json
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.11.2")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.2")
-
-    testImplementation("org.junit.jupiter:junit-jupiter:5.6.2")
-    testImplementation("io.mockk:mockk:1.10.0")
-
-    componentTestImplementation(sourceSets["test"].output)
-    componentTestImplementation("org.junit.jupiter:junit-jupiter:5.6.2")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.5.0")
+    testImplementation("io.mockk:mockk:1.9.3")
+    testImplementation("org.assertj:assertj-core:3.11.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.4.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.4.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.4.2")
 }
 
-compileTestKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
+tasks.withType<JacocoReport> {
+    reports {
+        xml.required
+        html.required
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.map {
+            fileTree(it).apply {
+                exclude(
+                    "com/school/cesar/criptocorretora/builders/",
+                    "cripto-corretora/src/main/kotlin/school/cesar/criptocorretora/builders"
+                )
+            }
+        }))
     }
 }
 
-
-val componentTestImplementation: Configuration by configurations.getting {
-    extendsFrom(configurations.implementation.get())
+tasks.test {
+    useJUnitPlatform()
 }
 
-configurations["componentTestRuntimeOnly"].extendsFrom(configurations.runtimeOnly.get())
+tasks.withType<JacocoCoverageVerification> {
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.00".toBigDecimal()
+                counter = "LINE"
+            }
+            limit {
+                minimum = "0.00".toBigDecimal()
+                counter = "BRANCH"
+            }
+        }
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.map {
+            fileTree(it).apply {
+                exclude(
+                    "com/school/cesar/criptocorretora/builders/CriptoBuilder.class",
+//                    "com/school/services/university/domain/validations/Constants.class",
+//                    "com/school/services/university/application/universityEntryPoint.class",
+//                    "com/school/services/university/application/Main.class",
+//                    "com/school/services/university/application/modules/**"
+                    "kotlin/school/cesar/criptocorretora/builders/CriptoBuilder.class"
+                )
+            }
+        }))
+    }
+}
+
+tasks.test {
+    finalizedBy(
+        "jacocoTestReport",
+        "jacocoTestCoverageVerification"
+    )
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // tests are required to run before generating the report
+}
+
+tasks.jacocoTestReport {
+    reports {
+        xml.required.set(false)
+        csv.required.set(false)
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
+    dependsOn(tasks.test)
+}
